@@ -6,9 +6,11 @@ var io            = sio(http);
 var adio          = sio(http2);
 var EventEmitter  = require('events');
 var events        = new EventEmitter();
-const SerialPort  = require('serialport')
-const Readline    = require('@serialport/parser-readline')
+const SerialPort  = require('serialport');
+const Readline    = require('@serialport/parser-readline');
 const body_parser = require('body-parser');
+const db = require("./db");
+let results = [];
 
 const port         = 3000;
 const arduino_port = "/dev/cu.usbmodem141101";
@@ -26,7 +28,8 @@ console.log(a);
 
 app.use(body_parser.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res, next) => {
+    results = await (await db.query("SELECT * FROM rfid")).rows;
 	res.sendFile(__dirname + '/index.html');
 });
 
@@ -44,8 +47,13 @@ io.on('connection', function(socket) {
 	});
 });
 
-parser.on('data', function(line) {
-	events.emit('data', {'label': 'RFID', 'rfid': line.trim()})
+parser.on('data', async function(line) {
+	results = await (await db.query("SELECT * FROM rfid")).rows;
+	events.emit('data', results);
+	db.query(
+		"INSERT INTO rfid (code, date) VALUES ($1,$2) RETURNING *",
+		[line.trim(), new Date().toLocaleString()]
+	);
 });
 
 http.listen(port, function() {

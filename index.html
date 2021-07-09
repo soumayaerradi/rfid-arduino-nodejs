@@ -22,6 +22,9 @@
 				font-family: 'Courier New', Courier, monospace;
 				font-size: 18px;
 			}
+			th,td {
+				width: 200px;
+			}
 		</style>
 	</head>
 	<body>
@@ -32,22 +35,45 @@
 		<button onclick="stopData()">Stop Data</button>
 		<button onclick="startData()">Start Data</button>
 		<button onclick="clearData()">Clear Data</button>
+		<div>
+			<table>
+				<th>id</th>
+				<th>code</th>
+				<th>date</th>
+				<tbody id="table"></tbody>
+			</table>
+		</div>
 		<script src="/socket.io/socket.io.js"></script>
   		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 		<script>
 			var socket = io.connect('http://localhost:3000');
 			var txtarea = document.getElementById('arduino-serial');
+			var table = document.getElementById('table');
 			function stopData() {
 				socket.off('data');
 			};
 			function startData() {
 				socket.on('data', function(elem) {
 					console.log("data received: ", elem);
-					if (elem.label === 'RFID') {
-						console.log("TXT: " + txtarea.value);
-						txtarea.value = txtarea.value + "-> RFID: " + elem.rfid + "\n";
-						txtarea.scrollTop = txtarea.scrollHeight;
-					}
+					table.innerHTML = "";
+					elem.forEach(element => {
+						var table_row  = document.createElement('tr'); 
+						table.appendChild(table_row);
+						var id = document.createElement('td');
+						id.innerText = element.id;
+						var code = document.createElement('td');
+						code.innerText = element.code;
+						var date = document.createElement('td');
+						date.innerText = element.date;
+						table_row.appendChild(id);
+						table_row.appendChild(code);
+						table_row.appendChild(date);
+					});
+					// if (elem.label === 'RFID') {
+					// 	console.log("TXT: " + txtarea.value);
+					// 	txtarea.value = txtarea.value + "-> RFID: " + elem.rfid + "\n";
+					// 	txtarea.scrollTop = txtarea.scrollHeight;
+					// }
 				});
 			};
 			function clearData() {
