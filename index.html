@@ -6,19 +6,20 @@
 			p {
 				font-family: 'Courier New', Courier, monospace;
 			}
-			h2{
+			h2 {
 				font-family: 'Courier New', Courier, monospace;
 			}
-			button{
+			button {
 				font-family: 'Courier New', Courier, monospace;
 				font-size: 15px;
+				margin-right: 50px;
 			}
-			label{
+			label {
 				font-family: 'Courier New', Courier, monospace;
 				font-size: 16px;
 				font-weight: bold;
 			}
-			textarea{
+			textarea {
 				font-family: 'Courier New', Courier, monospace;
 				font-size: 18px;
 			}
@@ -31,18 +32,17 @@
 		<label for="arduino-serial">Arduino Streaming Data:</label><br>
 		<p>Press Start Data to get data from Arduino.</p>
 		<p>To make it stop, press Stop Data.</p>
-		<textarea id="arduino-serial" cols="30" rows="10"></textarea><br>
+		<textarea id="arduino-serial" cols="50" rows="10"></textarea><br>
 		<button onclick="stopData()">Stop Data</button>
 		<button onclick="startData()">Start Data</button>
 		<button onclick="clearData()">Clear Data</button>
-		<div>
-			<table>
-				<th>id</th>
-				<th>code</th>
-				<th>date</th>
-				<tbody id="table"></tbody>
-			</table>
-		</div>
+
+		<table>
+            <th>id</th>
+            <th>Code</th>
+            <th>Date</th>
+            <tbody id="table"></tbody>
+        </table>
 		<script src="/socket.io/socket.io.js"></script>
   		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 		<script>
@@ -51,13 +51,13 @@
 			var table = document.getElementById('table');
 			function stopData() {
 				socket.off('data');
-			};
+			}
 			function startData() {
 				socket.on('data', function(elem) {
 					console.log("data received: ", elem);
 					table.innerHTML = "";
 					elem.forEach(element => {
-						var table_row  = document.createElement('tr'); 
+						var table_row  = document.createElement('tr');
 						table.appendChild(table_row);
 						var id = document.createElement('td');
 						id.innerText = element.id;
@@ -69,16 +69,16 @@
 						table_row.appendChild(code);
 						table_row.appendChild(date);
 					});
-					// if (elem.label === 'RFID') {
-					// 	console.log("TXT: " + txtarea.value);
-					// 	txtarea.value = txtarea.value + "-> RFID: " + elem.rfid + "\n";
-					// 	txtarea.scrollTop = txtarea.scrollHeight;
-					// }
+					if (!!elem.length) {
+						txtarea.value = txtarea.value + "-> RFID: " + elem[elem.length - 1].code + " DATE: " + elem[elem.length - 1].date + "\n";
+						txtarea.scrollTop = txtarea.scrollHeight;
+						console.log("TXT: " + txtarea.value);
+					}
 				});
-			};
+			}
 			function clearData() {
 				txtarea.value = "";
-			};
+			}
 		</script>
 	</body>
 </html>
